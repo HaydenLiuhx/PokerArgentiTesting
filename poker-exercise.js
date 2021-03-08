@@ -1,7 +1,5 @@
 var readline = require('readline')
 var fs =require('fs')
-// var readMe = fs.readFileSync("poker-hands.txt","utf8");
-
 
 var myInterface = readline.createInterface({
     input: fs.createReadStream("poker-hands.txt","utf8")
@@ -11,6 +9,9 @@ var lineArr = []
 let player1Win = 0
 let player2Win = 0
 let draw = 0
+/* 
+Readline: 500 games
+*/
 myInterface.on('line', function (line) {
   lineArr.push(line)
   let player1 = line.slice(0,14)
@@ -20,6 +21,9 @@ myInterface.on('line', function (line) {
   console.log('player1 is '+returnScore(player1)[2])
   console.log('player2 is '+returnScore(player2)[2])
   console.log('++++++---+++++')
+  /* 
+  Campare rank first, then value, then -> DRAW
+  */
   if (returnScore(player1)[0]>returnScore(player2)[0]){
     player1Win+=1
   } else if (returnScore(player1)[0]<returnScore(player2)[0]){
@@ -39,13 +43,13 @@ myInterface.on('line', function (line) {
 console.log('player1Win:'+player1Win)
 console.log('player2Win:'+player2Win)
 console.log('DRAW:'+draw)
-//console.log('Line number ' + lineno + ': ' + line);
-//console.log(lineArr)
-});
-// console.log('player1Win:'+player1Win)
-// console.log('player2Win:'+player2Win)
-// console.log('DRAW:'+draw)
 
+});
+
+/* 
+1. extract each card color and number
+2. change TJOKA to number
+*/
 let Pokerhand = function(card){
   let num = card.split('')[0]
   this.first = changeJQKA(num)
@@ -76,7 +80,14 @@ function changeJQKA(num){
   }
   return num
 }
-//console.log(changeJQKA('K'))
+
+/* 
+There are two combinations
+Each Combination return an Array[Rank, Value, Combination name]
+The cards in the deck are arranged from small to large 
+or according to the number of appearances, 
+so the weight of each card is different in different combination
+*/
 
 let straightFlush = (player) => {
   if(player[0].second == player[1].second &&
@@ -142,7 +153,7 @@ let FourOfAKind = (player) => {
     i+=count;
     
   }
-  //console.log(arr)
+
   for (var k = 0; k < arr.length; k++) {
     if (arr[k].count == 4){
       return [8,arr[k].date,'FourOfAKind']
@@ -288,10 +299,16 @@ let HighCard = (player) => {
     cardArr.push(i.first)
   }
   cardArr.sort((a)=>a.date)
-  //console.log(cardArr)
+
   return [1,cardArr[4]*10000000+cardArr[3]*100000+cardArr[2]*1000+cardArr[1]*20+cardArr[0],'HighCard']
 }
 
+/* 
+1. get player's five cards
+2. change cards to Poker class
+3. sort
+4. get the combination
+*/
 let returnScore = (cards) => {
   let playerArr = []
   for(let i of cards.split(' ')){
@@ -302,9 +319,7 @@ let returnScore = (cards) => {
   }).sort((player1,player2) => {
     return player1.first - player2.first
   })
-  // for(let n of playerCard){
-  //   console.log(n)
-  // }
+
   if (straightFlush(playerCard)){
     return straightFlush(playerCard)
   } else if (FourOfAKind(playerCard)){
